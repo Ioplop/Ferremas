@@ -9,7 +9,9 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ferremas.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = os.path.join('app', 'static', 'uploads')
+    app.config['PRODUCT_IMAGES'] = os.path.join('app', 'static', 'img', 'productos')
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['PRODUCT_IMAGES'], exist_ok=True)
 
     db.init_app(app)
 

@@ -30,7 +30,7 @@ def crear_producto():
 
     imagen_file = request.files['imagen']
     filename = secure_filename(imagen_file.filename)
-    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    filepath = os.path.join(current_app.config['PRODUCT_IMAGES'], filename)
     imagen_file.save(filepath)
 
     nuevo = Producto(
