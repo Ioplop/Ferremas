@@ -1,14 +1,15 @@
 from flask import Blueprint, request, jsonify, current_app, abort
-from .models import Producto
-from . import db
+from ..models import Producto
+from .. import db
 import os
 from werkzeug.utils import secure_filename
 from flask import url_for
 from functools import wraps
+from .validation import require_api_key
 
-api = Blueprint('api', __name__)
+api_productos = Blueprint('api_productos', __name__, url_prefix='/api/productos')
 
-@api.route('/api/productos', methods=['GET'])
+@api_productos.route('/', methods=['GET'])
 def listar_productos():
     productos = Producto.query.all()
     resultado = []
@@ -24,18 +25,7 @@ def listar_productos():
         })
     return jsonify(resultado)
 
-def require_api_key(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        api_key = request.form.get('api_key')
-        if not api_key:
-            return jsonify({'error': 'Se requiere api_key en el cuerpo de la solicitud'}), 401
-        if api_key != current_app.config['SECRET_API_KEY']:
-            return jsonify({'error': 'api_key inválida'}), 401
-        return func(*args, **kwargs)
-    return wrapper
-
-@api.route('/api/productos', methods=['POST'])
+@api_productos.route('/', methods=['POST'])
 @require_api_key
 def crear_producto():
     nombre = request.form['nombre']
@@ -58,14 +48,3 @@ def crear_producto():
     db.session.add(nuevo)
     db.session.commit()
     return jsonify({'mensaje': 'Producto creado con éxito'}), 201
-
-@api.route('/api/comprar/<int:id>', methods=['POST'])
-def comprar_producto(id):
-    producto = Producto.query.get_or_404(id)
-    cantidad = int(request.json.get('cantidad', 1))
-    if producto.stock >= cantidad:
-        producto.stock -= cantidad
-        db.session.commit()
-        return jsonify({'mensaje': 'Compra realizada correctamente'})
-    else:
-        return jsonify({'error': 'Stock insuficiente'})

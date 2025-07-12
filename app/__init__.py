@@ -20,7 +20,6 @@ def add_dotenv_var(env_path: str, name: str, value: str):
         f.write(f"{name}={value}\n")
     os.environ[name] = value
 
-
 def create_app():
     app = Flask(__name__)
     # Cargar variables de entorno
@@ -36,7 +35,7 @@ def create_app():
         apikey = secrets.token_hex(32)
         add_dotenv_var(env_path, "SECRET_API_KEY", apikey)
     app.config['SECRET_API_KEY'] = apikey
-    
+
     # Base de datos
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ferremas.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -54,8 +53,9 @@ def create_app():
     # Iniciar base de datos
     db.init_app(app)
 
-    from .routes import api
-    app.register_blueprint(api)
+    # Registrar blueprints de apis
+    from .api.productos import api_productos
+    app.register_blueprint(api_productos)
 
     with app.app_context():
         db.create_all()
