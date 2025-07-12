@@ -208,3 +208,4 @@ __marimo__/
 
 # Ignorar base de dato SQLite para impedir diferencias de repo cada vez que hagamos pruebas. Cada uno tendrá su propia base de datos que podemos compartirnos si hace falta
 *.sqlite
+*.db
