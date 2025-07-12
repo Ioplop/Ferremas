@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from .models import Producto
 from . import db
 import os
@@ -30,7 +30,7 @@ def crear_producto():
 
     imagen_file = request.files['imagen']
     filename = secure_filename(imagen_file.filename)
-    filepath = os.path.join('app/static/uploads', filename)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     imagen_file.save(filepath)
 
     nuevo = Producto(
