@@ -6,7 +6,7 @@ class Producto(db.Model):
     descripcion = db.Column(db.Text, nullable=True)
     precio = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
-    imagen = db.Column(db.String(255))  # Ruta del archivo
+    imagen = db.Column(db.String(255))
 
 class Cotizacion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
