@@ -1,6 +1,7 @@
 from . import db
 
 class Producto(db.Model):
+    __tablename__ = 'producto'
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text, nullable=True)
@@ -9,12 +10,14 @@ class Producto(db.Model):
     imagen = db.Column(db.String(255))
 
 class Cotizacion(db.Model):
+    __tablename__ = 'cotizacion'
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, nullable=False)
     productos = db.relationship("CotizacionProducto", back_populates="cotizacion", cascade="all, delete-orphan")
+    orden_compra = db.relationship("OrdenCompra", back_populates="cotizacion", uselist=False)
 
 class CotizacionProducto(db.Model):
-    __tablename__ = 'producto_cotizacion'
+    __tablename__ = 'cotizacion_producto'
     cotizacion_id = db.Column(
         db.Integer, 
         db.ForeignKey('cotizacion.id', ondelete="CASCADE"), 
@@ -32,6 +35,7 @@ class CotizacionProducto(db.Model):
     cotizacion = db.relationship("Cotizacion", back_populates="productos")
 
 class OrdenCompra(db.Model):
+    __tablename__ = 'orden_compra'
     id = db.Column(db.Integer, primary_key=True)
     cotizacion_id = db.Column(db.Integer, db.ForeignKey('cotizacion.id'), nullable=False, unique=True)
     
