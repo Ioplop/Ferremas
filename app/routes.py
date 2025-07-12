@@ -3,6 +3,7 @@ from .models import Producto
 from . import db
 import os
 from werkzeug.utils import secure_filename
+from flask import url_for
 
 api = Blueprint('api', __name__)
 
@@ -11,13 +12,14 @@ def listar_productos():
     productos = Producto.query.all()
     resultado = []
     for p in productos:
+        imagen_url = url_for('static', filename=f"{current_app.config['PRODUCT_IMAGES_URL']}/{p.imagen}", _external=True)
         resultado.append({
             'id': p.id,
             'nombre': p.nombre,
             'descripcion': p.descripcion,
             'precio': p.precio,
             'stock': p.stock,
-            'imagen': p.imagen
+            'imagen': imagen_url
         })
     return jsonify(resultado)
 
