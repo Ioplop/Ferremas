@@ -48,3 +48,41 @@ def crear_producto():
     db.session.add(nuevo)
     db.session.commit()
     return jsonify({'mensaje': 'Producto creado con éxito'}), 201
+
+@api_productos.route('/', methods=['PATCH'])
+@require_api_key
+def modificar_producto():
+    producto_id = int(request.form['id'])  # o 'producto_id' si prefieres
+
+    producto = Producto.query.get_or_404(producto_id)
+
+    if 'nombre' in request.form:
+        producto.nombre = request.form['nombre']
+    if 'descripcion' in request.form:
+        producto.descripcion = request.form['descripcion']
+    if 'precio' in request.form:
+        producto.precio = float(request.form['precio'])
+    if 'stock' in request.form:
+        producto.stock = int(request.form['stock'])
+
+    if 'imagen' in request.files:
+        imagen_file = request.files['imagen']
+        filename = secure_filename(imagen_file.filename)
+        filepath = os.path.join(current_app.config['PRODUCT_IMAGES'], filename)
+        imagen_file.save(filepath)
+        producto.imagen = filename
+
+    db.session.commit()
+    return jsonify({'mensaje': 'Producto actualizado con éxito'})
+
+@api_productos.route('/', methods=['DELETE'])
+@require_api_key
+def eliminar_producto():
+    producto_id = request.form.get('id')
+    if not producto_id:
+        return jsonify({'error': 'Falta el ID del producto'}), 400
+
+    producto = Producto.query.get_or_404(int(producto_id))
+    db.session.delete(producto)
+    db.session.commit()
+    return jsonify({'mensaje': 'Producto eliminado con éxito'})
