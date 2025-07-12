@@ -4,14 +4,33 @@ from .. import db
 import os
 from werkzeug.utils import secure_filename
 from flask import url_for
-from functools import wraps
 from .validation import require_api_key
 
 api_productos = Blueprint('api_productos', __name__, url_prefix='/api/productos')
 
 @api_productos.route('/', methods=['GET'])
 def listar_productos():
-    productos = Producto.query.all()
+    query = Producto.query
+
+    # Filtros opcionales
+    id = request.args.get('id', type=int)
+    if id is not None:
+        query = query.filter(Producto.id == id)
+
+    nombre = request.args.get('nombre')
+    if nombre:
+        query = query.filter(Producto.nombre.ilike(f"%{nombre}%"))
+
+    stock_min = request.args.get('stock_min', type=int)
+    if stock_min is not None:
+        query = query.filter(Producto.stock >= stock_min)
+
+    precio_max = request.args.get('precio_max', type=float)
+    if precio_max is not None:
+        query = query.filter(Producto.precio <= precio_max)
+
+    productos = query.all()
+
     resultado = []
     for p in productos:
         imagen_url = url_for('static', filename=f"{current_app.config['PRODUCT_IMAGES_URL']}/{p.imagen}", _external=True)
@@ -23,6 +42,7 @@ def listar_productos():
             'stock': p.stock,
             'imagen': imagen_url
         })
+
     return jsonify(resultado)
 
 @api_productos.route('/', methods=['POST'])
