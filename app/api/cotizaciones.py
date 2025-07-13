@@ -17,8 +17,8 @@ def serializar_cotizacion(cotizacion):
             'id': cp.producto.id,
             'nombre': cp.producto.nombre,
             'cantidad': cp.cantidad,
-            'precio_unitario': cp.precio_unitario,
-            'subtotal': cp.precio_unitario * cp.cantidad
+            'precio_unidad': cp.precio_unidad,
+            'subtotal': cp.precio_unidad * cp.cantidad
         })
 
     return {
