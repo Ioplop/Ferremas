@@ -1,6 +1,11 @@
 from flask import request, jsonify, current_app
 from functools import wraps
 
+def valid_api_key(api_key: str) -> bool:
+    if not api_key:
+        return False
+    return api_key == current_app.config['SECRET_API_KEY']
+
 def require_api_key(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

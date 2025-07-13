@@ -12,6 +12,7 @@ class Producto(db.Model):
 class Cotizacion(db.Model):
     __tablename__ = 'cotizacion'
     id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(36), unique=True, nullable=False)
     fecha = db.Column(db.DateTime, nullable=False)
     bloqueado = db.Column(db.Boolean, default=False)
     productos = db.relationship("CotizacionProducto", back_populates="cotizacion", cascade="all, delete-orphan")

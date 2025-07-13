@@ -72,7 +72,7 @@ def post_producto():
 @api_productos.route('/', methods=['PATCH'])
 @require_api_key
 def patch_producto():
-    producto_id = int(request.form['id'])  # o 'producto_id' si prefieres
+    producto_id = int(request.form['id'])
 
     producto = Producto.query.get_or_404(producto_id)
 

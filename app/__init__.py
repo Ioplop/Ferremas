@@ -55,7 +55,9 @@ def create_app():
 
     # Registrar blueprints de apis
     from .api.productos import api_productos
+    from .api.cotizaciones import api_cotizaciones
     app.register_blueprint(api_productos)
+    app.register_blueprint(api_cotizaciones)
 
     with app.app_context():
         db.create_all()
