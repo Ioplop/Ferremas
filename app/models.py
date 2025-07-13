@@ -13,6 +13,7 @@ class Cotizacion(db.Model):
     __tablename__ = 'cotizacion'
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, nullable=False)
+    bloqueado = db.Column(db.Boolean, default=False)
     productos = db.relationship("CotizacionProducto", back_populates="cotizacion", cascade="all, delete-orphan")
     orden_compra = db.relationship("OrdenCompra", back_populates="cotizacion", uselist=False)
 
@@ -30,6 +31,7 @@ class CotizacionProducto(db.Model):
     )
     
     cantidad = db.Column(db.Integer, nullable=False)
+    precio_unidad = db.Column(db.Integer, nullable=False)
 
     producto = db.relationship("Producto", passive_deletes=False)
     cotizacion = db.relationship("Cotizacion", back_populates="productos")
