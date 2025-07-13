@@ -9,7 +9,7 @@ from .validation import require_api_key
 api_productos = Blueprint('api_productos', __name__, url_prefix='/api/productos')
 
 @api_productos.route('/', methods=['GET'])
-def listar_productos():
+def get_producto():
     query = Producto.query
 
     # Filtros opcionales
@@ -47,7 +47,7 @@ def listar_productos():
 
 @api_productos.route('/', methods=['POST'])
 @require_api_key
-def crear_producto():
+def post_producto():
     nombre = request.form['nombre']
     descripcion = request.form.get('descripcion', '')
     precio = float(request.form['precio'])
@@ -71,7 +71,7 @@ def crear_producto():
 
 @api_productos.route('/', methods=['PATCH'])
 @require_api_key
-def modificar_producto():
+def patch_producto():
     producto_id = int(request.form['id'])  # o 'producto_id' si prefieres
 
     producto = Producto.query.get_or_404(producto_id)
@@ -97,7 +97,7 @@ def modificar_producto():
 
 @api_productos.route('/', methods=['DELETE'])
 @require_api_key
-def eliminar_producto():
+def delete_producto():
     producto_id = request.form.get('id')
     if not producto_id:
         return jsonify({'error': 'Falta el ID del producto'}), 400
