@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, abort
-from ..models import Cotizacion, Producto
+from ..models import Cotizacion, Producto, CotizacionProducto
 from .. import db
 import os
 from werkzeug.utils import secure_filename
@@ -54,6 +54,7 @@ def ver_cotizacion():
     else:
         return jsonify({'error': 'Se requiere el parámetro "uuid" o una api-key'}), 400
 
+# 
 @api_cotizaciones.route('/', methods=['POST'])
 def crear_cotizacion():
     nueva_cotizacion = Cotizacion(
@@ -66,3 +67,51 @@ def crear_cotizacion():
 
     return jsonify({'cotizacion_uuid': nueva_cotizacion.uuid}), 201
 
+@api_cotizaciones.route('/producto', methods=['PATCH'])
+def agregar_o_actualizar_producto():
+    uuid = request.form.get('uuid')
+    producto_id = request.form.get('producto_id', type=int)
+    cantidad = request.form.get('cantidad', type=int)
+
+    if not uuid or producto_id is None or cantidad is None:
+        return jsonify({'error': 'Se requiere uuid, producto_id y cantidad'}), 400
+
+    cot = Cotizacion.query.filter_by(uuid=uuid).first()
+    if not cot:
+        return jsonify({'error': 'Cotización no encontrada'}), 404
+    if cot.bloqueado:
+        return jsonify({'error': 'La cotización está bloqueada y no se puede modificar'}), 403
+
+    producto = Producto.query.get(producto_id)
+    if not producto:
+        return jsonify({'error': 'Producto no encontrado'}), 404
+
+    cp = CotizacionProducto.query.filter_by(
+        cotizacion_id=cot.id,
+        producto_id=producto.id
+    ).first()
+
+    # cantidad==0 indica que el usuario quiere ELIMINAR el producto del carrito.
+    if cantidad == 0:
+        if cp:
+            db.session.delete(cp)
+            db.session.commit()
+            return jsonify({'mensaje': 'Producto eliminado del carrito'}), 200
+        else:
+            return jsonify({'mensaje': 'El producto no estaba en el carrito'}), 200
+
+    # Queremos actualizar la cantidad de productos en el carrito. Debemos primero ver si ya existe el producto en el carro.
+    if cp: # Se usa relacion ya existente
+        cp.cantidad = cantidad
+        cp.precio_unidad = producto.precio
+    else: # Se crea nueva relacion
+        cp = CotizacionProducto(
+            cotizacion_id=cot.id,
+            producto_id=producto.id,
+            cantidad=cantidad,
+            precio_unidad=producto.precio
+        )
+        db.session.add(cp)
+
+    db.session.commit()
+    return jsonify({'mensaje': 'Producto agregado/modificado exitosamente'}), 200

@@ -7,6 +7,7 @@ class Producto(db.Model):
     descripcion = db.Column(db.Text, nullable=True)
     precio = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
+    reservados = db.Column(db.Integer, default=0)
     imagen = db.Column(db.String(255))
 
 class Cotizacion(db.Model):
