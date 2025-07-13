@@ -22,7 +22,7 @@ def serializar_cotizacion(cotizacion):
         })
 
     return {
-        'id': cp.producto.id,
+        'id': cotizacion.id,
         'uuid': cotizacion.uuid,
         'fecha': cotizacion.fecha.isoformat(),
         'bloqueado': cotizacion.bloqueado,
@@ -33,6 +33,7 @@ def serializar_cotizacion(cotizacion):
 def ver_cotizacion():
     uuid_str = request.args.get('uuid')
     api_key = request.args.get('api_key')
+    id = request.args.get('id')
     
     if uuid_str:
         cotizacion = Cotizacion.query.filter_by(uuid=uuid_str).first()
@@ -42,7 +43,10 @@ def ver_cotizacion():
     elif api_key is not None:
         if not valid_api_key(api_key):
             return jsonify({'error': 'La api-key es invalida'}), 401
-        cotizaciones = Cotizacion.query.all()
+        if id is None:
+            cotizaciones = Cotizacion.query.all()
+        else:
+            cotizaciones = Cotizacion.query.filter(Cotizacion.id == id).all()
         resultado = []
         for cot in cotizaciones:
             resultado.append(serializar_cotizacion(cot))
