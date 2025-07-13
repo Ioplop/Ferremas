@@ -40,6 +40,7 @@ def get_producto():
             'descripcion': p.descripcion,
             'precio': p.precio,
             'stock': p.stock,
+            'reservados': p.reservados,
             'imagen': imagen_url
         })
 
@@ -84,6 +85,8 @@ def patch_producto():
         producto.precio = float(request.form['precio'])
     if 'stock' in request.form:
         producto.stock = int(request.form['stock'])
+    if 'reservados' in request.form:
+        producto.reservados = int(request.form['reservados'])
 
     if 'imagen' in request.files:
         imagen_file = request.files['imagen']
