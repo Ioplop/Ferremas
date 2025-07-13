@@ -115,3 +115,23 @@ def agregar_o_actualizar_producto():
 
     db.session.commit()
     return jsonify({'mensaje': 'Producto agregado/modificado exitosamente'}), 200
+
+@api_cotizaciones.route('/', methods=['DELETE'])
+@require_api_key
+def eliminar_cotizacion():
+    cotizacion_id = request.form.get('id', type=int)
+    
+    if not cotizacion_id:
+        return jsonify({'error': 'Se requiere el parámetro id'}), 400
+
+    cotizacion = Cotizacion.query.get(cotizacion_id)
+    if not cotizacion:
+        return jsonify({'error': 'Cotización no encontrada'}), 404
+
+    if cotizacion.bloqueado:
+        return jsonify({'error': 'La cotización está bloqueada y no puede eliminarse'}), 403
+
+    db.session.delete(cotizacion)
+    db.session.commit()
+
+    return jsonify({'mensaje': 'Cotización eliminada con éxito'}), 200
