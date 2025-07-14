@@ -58,6 +58,9 @@ class OrdenCompra(db.Model):
 
     metodo_envio = db.Column(db.String(50))  # ej: "retiro", "despacho", etc.
     metodo_pago = db.Column(db.String(50))   # ej: "webpay", "efectivo", etc.
+    
+    transaccion = db.Column(db.String(64)) # Token de transaccion transbank
+    url = db.Coulumn(db.String(256)) # URL para realizar pago con transbank
 
     estado = db.Column(db.String(50), default='pendiente')  # pendiente, pagada, en camino, recibido
 
