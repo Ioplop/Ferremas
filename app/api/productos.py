@@ -49,12 +49,24 @@ def get_producto():
 @api_productos.route('/', methods=['POST'])
 @require_api_key
 def post_producto():
-    nombre = request.form['nombre']
-    descripcion = request.form.get('descripcion', '')
-    precio = float(request.form['precio'])
-    stock = int(request.form['stock'])
+    try:
+        nombre = request.form.get('nombre')
+        descripcion = request.form.get('descripcion', '')
+        precio = float(request.form.get('precio', 0))
+        stock = int(request.form.get('stock', 0))
+        imagen_file = request.files.get('imagen', None)
+    except Exception as e:
+        return jsonify({'mensaje': f'Cuerpo invalido: {e}'}), 400
+    
+    if not nombre:
+        return jsonify({'mensaje': 'Se debe ingresar un nombre'}), 400
+    if precio <= 0:
+        return jsonify({'mensaje': 'Se debe ingresar un precio positivo'}), 400
+    if not stock:
+        return jsonify({'mensaje': 'Se debe ingresar un stock mayor que 0'}), 400
+    if not imagen_file:
+        return jsonify({'mensaje': 'Se debe ingresar una imagen referencial'}), 400
 
-    imagen_file = request.files['imagen']
     filename = secure_filename(imagen_file.filename)
     filepath = os.path.join(current_app.config['PRODUCT_IMAGES'], filename)
     imagen_file.save(filepath)
@@ -68,12 +80,15 @@ def post_producto():
     )
     db.session.add(nuevo)
     db.session.commit()
-    return jsonify({'mensaje': 'Producto creado con éxito'}), 201
+    return jsonify({'mensaje': 'Producto creado con éxito', 'id': nuevo.id}), 201
 
 @api_productos.route('/', methods=['PATCH'])
 @require_api_key
 def patch_producto():
-    producto_id = int(request.form['id'])
+    try:
+        producto_id = int(request.form['id'])
+    except:
+        return jsonify({'mensaje': 'Se debe indicar id del producto'}), 400
 
     producto = Producto.query.get_or_404(producto_id)
 
