@@ -156,3 +156,21 @@ def desbloquear_cotizacion():
     db.session.commit()
 
     return jsonify({'mensaje': 'Cotización desbloqueada con éxito'}), 200
+
+@api_cotizaciones.route('/bloquear', methods=['PATCH'])
+def bloquear_cotizacion():
+    uuid_str = request.form.get('uuid')
+    if not uuid_str:
+        return jsonify({'error': 'Se requiere el UUID'}), 400
+
+    cot = Cotizacion.query.filter_by(uuid=uuid_str).first()
+    if not cot:
+        return jsonify({'error': 'Cotización no encontrada'}), 404
+
+    if cot.bloqueado:
+        return jsonify({'error': 'La cotización ya está bloqueada'}), 400
+
+    cot.bloqueado = True
+    db.session.commit()
+
+    return jsonify({'mensaje': 'Cotización bloqueada con éxito'}), 200
