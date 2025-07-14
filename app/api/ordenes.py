@@ -183,6 +183,7 @@ def ver_orden():
 def modificar_orden():
     uuid_str = request.form.get('uuid')
     api_key = request.form.get('api_key')
+    admin = api_key and valid_api_key(api_key)
 
     if not uuid_str:
         return jsonify({'error': 'Se requiere el UUID'}), 400
@@ -191,7 +192,7 @@ def modificar_orden():
     if not orden:
         return jsonify({'error': 'Orden no encontrada'}), 404
 
-    if orden.estado != 'pendiente':
+    if orden.estado != 'pendiente' and not admin:
         return jsonify({'error': 'Solo se pueden modificar órdenes en estado pendiente'}), 403
 
     # Solo actualizar campos permitidos (NO estado)
@@ -210,7 +211,7 @@ def modificar_orden():
     
     # Intento de modificar estado:
     if 'estado' in request.form:
-        if api_key and valid_api_key(api_key):
+        if admin:
             orden.estado = request.form['estado']
         else:
             return jsonify({'error': 'Se requiere API key válida para modificar el estado'}), 401
