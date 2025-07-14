@@ -8,6 +8,7 @@ from .validation import require_api_key, valid_api_key
 from datetime import datetime, timezone
 import uuid
 from typing import Tuple
+from .cotizaciones import serializar_cotizacion
 
 api_ordenes = Blueprint('api_ordenes', __name__, url_prefix='/api/ordenes')
 
@@ -139,17 +140,6 @@ def ver_orden():
         if not orden:
             return jsonify({'error': 'Orden no encontrada'}), 404
 
-        cot = orden.cotizacion
-        productos = []
-        for cp in cot.productos:
-            productos.append({
-                'id': cp.producto.id,
-                'nombre': cp.producto.nombre,
-                'cantidad': cp.cantidad,
-                'precio_unitario': cp.precio_unitario,
-                'subtotal': cp.precio_unitario * cp.cantidad
-            })
-
         return jsonify({
             'uuid': orden.uuid,
             'estado': orden.estado,
@@ -160,7 +150,7 @@ def ver_orden():
             'contacto_telefono': orden.contacto_telefono,
             'metodo_envio': orden.metodo_envio,
             'metodo_pago': orden.metodo_pago,
-            'productos': productos
+            'cotizacion': serializar_cotizacion(orden.cotizacion)
         }), 200
 
     elif api_key:
@@ -170,17 +160,6 @@ def ver_orden():
         ordenes = OrdenCompra.query.all()
         resultado = []
         for orden in ordenes:
-            cot = orden.cotizacion
-            productos = []
-            for cp in cot.productos:
-                productos.append({
-                    'id': cp.producto.id,
-                    'nombre': cp.producto.nombre,
-                    'cantidad': cp.cantidad,
-                    'precio_unitario': cp.precio_unitario,
-                    'subtotal': cp.precio_unitario * cp.cantidad
-                })
-
             resultado.append({
                 'id': orden.id,
                 'uuid': orden.uuid,
@@ -192,7 +171,7 @@ def ver_orden():
                 'contacto_telefono': orden.contacto_telefono,
                 'metodo_envio': orden.metodo_envio,
                 'metodo_pago': orden.metodo_pago,
-                'productos': productos
+                'cotizacion': serializar_cotizacion(orden.cotizacion)
             })
 
         return jsonify(resultado), 200
