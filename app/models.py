@@ -16,6 +16,7 @@ class Cotizacion(db.Model):
     uuid = db.Column(db.String(36), unique=True, nullable=False)
     fecha = db.Column(db.DateTime, nullable=False)
     bloqueado = db.Column(db.Boolean, default=False)
+    total = db.Column(db.Integer, default=0)
     productos = db.relationship("CotizacionProducto", back_populates="cotizacion", cascade="all, delete-orphan")
     orden_compra = db.relationship("OrdenCompra", back_populates="cotizacion", uselist=False)
 

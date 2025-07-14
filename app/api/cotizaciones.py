@@ -10,7 +10,7 @@ import uuid
 
 api_cotizaciones = Blueprint('api_cotizaciones', __name__, url_prefix='/api/cotizaciones')
 
-def serializar_cotizacion(cotizacion):
+def serializar_cotizacion(cotizacion: Cotizacion):
     productos = []
     for cp in cotizacion.productos:
         productos.append({
@@ -26,8 +26,15 @@ def serializar_cotizacion(cotizacion):
         'uuid': cotizacion.uuid,
         'fecha': cotizacion.fecha.isoformat(),
         'bloqueado': cotizacion.bloqueado,
-        'productos': productos
+        'productos': productos,
+        'total': cotizacion.total
     }
+
+def calcular_cotizacion(cotizacion: Cotizacion) -> int:
+    total = 0
+    for cp in cotizacion.productos:
+        total += cp.precio_unidad * cp.cantidad
+    return total
 
 @api_cotizaciones.route('/', methods=['GET'])
 def ver_cotizacion():
@@ -112,7 +119,7 @@ def agregar_o_actualizar_producto():
             precio_unidad=producto.precio
         )
         db.session.add(cp)
-
+    cot.total = calcular_cotizacion(cot)
     db.session.commit()
     return jsonify({'mensaje': 'Producto agregado/modificado exitosamente'}), 200
 
