@@ -7,6 +7,19 @@ window.onload = function () {
   mostrarVista('portada');
   document.getElementById('form-nuevo-producto').addEventListener('submit', crearProducto);
   document.getElementById('bloquearCotizacionBtn').addEventListener('click', bloquearCotizacion);
+
+  document.getElementById('btnInicio').addEventListener('click', function () {
+    mostrarVista('portada');
+  });
+  document.getElementById('btnProductos').addEventListener('click', function () {
+    mostrarVista('productos');
+  });
+  document.getElementById('btnCarrito').addEventListener('click', function () {
+    mostrarVista('carrito');
+  });
+  document.getElementById('btnAdmin').addEventListener('click', function () {
+    mostrarVista('admin');
+  });
 };
 
 function mostrarVista(vista) {
@@ -83,7 +96,7 @@ function cargarProductos() {
           '<p>' + producto.descripcion + '</p>' +
           '<p><strong>$' + producto.precio + '</strong></p>' +
           '<input type="number" min="1" value="1" id="cantidad-' + producto.id + '">' +
-          '<button onclick="agregarProducto(' + producto.id + ')">Agregar</button>';
+          '<button onclick="agregarProducto(' + producto.id + ')">Agregar al carrito</button>';
         contenedor.appendChild(div);
       }
     }
@@ -102,9 +115,22 @@ function agregarProducto(productoId) {
   xhr.open('PATCH', API_BASE + '/cotizaciones/producto', true);
   xhr.onload = function () {
     cargarCotizacion();
+    mostrarVista('carrito');
+    mostrarPopUp();
   };
   xhr.send(form);
 }
+
+function mostrarPopUp() {
+  const decision = confirm("Producto agregado ✅\n\n¿Deseas ir a pagar o seguir comprando?");
+  if (decision) {
+    mostrarVista('carrito');
+  } else {
+    mostrarVista('productos');
+  }
+}
+
+
 
 // ------------------- ADMIN -------------------
 function crearProducto(event) {
