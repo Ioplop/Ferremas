@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ferremas - Cotizador</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>🛠️ Ferremas</h1>
+    <nav>
+      <button onclick="mostrarVista('portada')">Inicio</button>
+      <button onclick="mostrarVista('productos')">Productos</button>
+      <button onclick="mostrarVista('carrito')">Carrito</button>
+      <button onclick="mostrarVista('admin')">Admin</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="portada" class="vista">
+      <h2>Bienvenido al sistema de cotizaciones Ferremas</h2>
+      <p>Explora nuestros productos, arma tu carrito y genera tu orden de compra.</p>
+    </section>
+
+    <section id="productos" class="vista" style="display:none">
+      <h2>Productos disponibles</h2>
+      <div id="lista-productos" class="grid-productos"></div>
+    </section>
+
+    <section id="carrito" class="vista" style="display:none">
+      <h2>🧾 Cotización actual</h2>
+      <div id="cotizacion"></div>
+      <button id="bloquearCotizacionBtn">Bloquear Cotización</button>
+    </section>
+
+    <section id="admin" class="vista" style="display:none">
+      <h2>Agregar nuevo producto (requiere API Key)</h2>
+      <form id="form-nuevo-producto">
+        <input type="text" id="api_key" placeholder="API Key" required>
+        <input type="text" id="nombre" placeholder="Nombre" required>
+        <input type="text" id="descripcion" placeholder="Descripción">
+        <input type="number" id="precio" placeholder="Precio" required>
+        <input type="number" id="stock" placeholder="Stock" required>
+        <input type="file" id="imagen" accept="image/*" required>
+        <button type="submit">Crear producto</button>
+      </form>
+      <div id="mensaje-admin"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Ferremas</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
