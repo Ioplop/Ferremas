@@ -58,10 +58,12 @@ def create_app():
     from .api.cotizaciones import api_cotizaciones
     from .api.ordenes import api_ordenes
     from .api.pagos import api_pagos
+    from .api.moneda import api_moneda
     app.register_blueprint(api_productos)
     app.register_blueprint(api_cotizaciones)
     app.register_blueprint(api_ordenes)
     app.register_blueprint(api_pagos)
+    app.register_blueprint(api_moneda)
 
     with app.app_context():
         db.create_all()
