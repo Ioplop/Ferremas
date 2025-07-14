@@ -36,8 +36,6 @@ def pagar_orden():
     # Obtener valor de la orden de compra
     total = orden.cotizacion.total
 
-    # Ahora debemos convertir a usd o la moneda que corresponda usando la api de banco central
-
     # Luego debemos crear la transaccion en transbank
     # https://webpay3g.transbank.cl (ambiente produccion)
     # https://webpay3gint.transbank.cl/ (ambiente integracion)
@@ -51,7 +49,7 @@ def pagar_orden():
         amount=total,
         return_url="http://127.0.0.1:5001/static/index.html"
     )
-
+    
     token = response['token']
     url = response['url']
     orden.transaccion = token
