@@ -120,7 +120,7 @@ def eliminar_orden():
     if not orden:
         return jsonify({'error': 'Orden no encontrada'}), 404
 
-    if orden.estado != 'pendiente':
+    if orden.estado != 'pendiente' and orden.estado != 'fallido':
         return jsonify({'error': f"No se puede eliminar una orden en estado '{orden.estado}'"}), 403
 
     liberar_stock(orden.cotizacion)
