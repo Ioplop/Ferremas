@@ -1,167 +1,179 @@
 const API_BASE = '/api';
 let cotizacionUUID = null;
 
-// ------------------- INICIAL -------------------
 window.onload = function () {
-  crearCotizacion();
   mostrarVista('portada');
   document.getElementById('form-nuevo-producto').addEventListener('submit', crearProducto);
-  document.getElementById('bloquearCotizacionBtn').addEventListener('click', bloquearCotizacion);
-
-  document.getElementById('btnInicio').addEventListener('click', function () {
-    mostrarVista('portada');
-  });
-  document.getElementById('btnProductos').addEventListener('click', function () {
-    mostrarVista('productos');
-  });
-  document.getElementById('btnCarrito').addEventListener('click', function () {
-    mostrarVista('carrito');
-  });
-  document.getElementById('btnAdmin').addEventListener('click', function () {
-    mostrarVista('admin');
+  document.getElementById('form-orden-compra').addEventListener('submit', function (e) {
+    e.preventDefault();
+    crearOrdenDeCompra();
   });
 };
 
 function mostrarVista(vista) {
-  var secciones = document.getElementsByClassName('vista');
-  for (var i = 0; i < secciones.length; i++) {
-    secciones[i].style.display = 'none';
-  }
+  document.querySelectorAll('.vista').forEach(v => v.style.display = 'none');
   document.getElementById(vista).style.display = 'block';
 
   if (vista === 'productos') cargarProductos();
   if (vista === 'carrito') cargarCotizacion();
 }
 
-// ------------------- COTIZACIÓN -------------------
 function crearCotizacion() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', API_BASE + '/cotizaciones/', true);
-  xhr.onload = function () {
-    if (xhr.status === 201) {
-      var data = JSON.parse(xhr.responseText);
+  return fetch(API_BASE + '/cotizaciones/', {
+    method: 'POST'
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Error al crear cotización");
+      return res.json();
+    })
+    .then(data => {
       cotizacionUUID = data.cotizacion_uuid;
-    }
-  };
-  xhr.send();
+    });
 }
 
 function bloquearCotizacion() {
-  var form = new FormData();
+  const form = new FormData();
   form.append('uuid', cotizacionUUID);
-
-  var xhr = new XMLHttpRequest();
-  xhr.open('PATCH', API_BASE + '/cotizaciones/bloquear', true);
-  xhr.onload = function () {
-    alert(JSON.parse(xhr.responseText).mensaje);
-  };
-  xhr.send(form);
+  return fetch(API_BASE + '/cotizaciones/bloquear', {
+    method: 'PATCH',
+    body: form
+  });
 }
 
-function cargarCotizacion() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', API_BASE + '/cotizaciones/?uuid=' + cotizacionUUID, true);
-  xhr.onload = function () {
-    if (xhr.status === 200) {
-      var data = JSON.parse(xhr.responseText)[0];
-      var div = document.getElementById('cotizacion');
-      div.innerHTML = '';
-      for (var i = 0; i < data.productos.length; i++) {
-        var p = data.productos[i];
-        var item = document.createElement('div');
-        item.innerHTML = p.nombre + ' - ' + p.cantidad + ' x $' + p.precio_unidad + ' = $' + p.subtotal;
-        div.appendChild(item);
-      }
-    }
-  };
-  xhr.send();
-}
-
-// ------------------- PRODUCTOS -------------------
 function cargarProductos() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', API_BASE + '/productos/', true);
-  xhr.onload = function () {
-    if (xhr.status === 200) {
-      var productos = JSON.parse(xhr.responseText);
-      var contenedor = document.getElementById('lista-productos');
+  fetch(API_BASE + '/productos/')
+    .then(res => res.json())
+    .then(productos => {
+      const contenedor = document.getElementById('lista-productos');
       contenedor.innerHTML = '';
-      for (var i = 0; i < productos.length; i++) {
-        var producto = productos[i];
-        var div = document.createElement('div');
+      productos.forEach(p => {
+        const div = document.createElement('div');
         div.className = 'producto';
-        div.innerHTML =
-          '<img src="' + producto.imagen + '" width="100">' +
-          '<h4>' + producto.nombre + '</h4>' +
-          '<p>' + producto.descripcion + '</p>' +
-          '<p><strong>$' + producto.precio + '</strong></p>' +
-          '<input type="number" min="1" value="1" id="cantidad-' + producto.id + '">' +
-          '<button onclick="agregarProducto(' + producto.id + ')">Agregar al carrito</button>';
+        div.innerHTML = `
+          <img src="${p.imagen}" width="100">
+          <h4>${p.nombre}</h4>
+          <p>${p.descripcion}</p>
+          <p><strong>$${p.precio}</strong></p>
+          <input type="number" min="1" value="1" id="cantidad-${p.id}">
+          <button onclick="pagarProducto(${p.id})">Pagar</button>
+        `;
         contenedor.appendChild(div);
-      }
-    }
-  };
-  xhr.send();
+      });
+    });
 }
 
-function agregarProducto(productoId) {
-  var cantidad = document.getElementById('cantidad-' + productoId).value;
-  var form = new FormData();
+function pagarProducto(productoId) {
+  const cantidad = document.getElementById(`cantidad-${productoId}`).value;
+
+  function continuarFlujo() {
+    agregarProducto(productoId, cantidad)
+      .then(() => bloquearCotizacion())
+      .then(() => {
+        mostrarVista('carrito');
+        setTimeout(() => document.getElementById('nombre_contacto').focus(), 100);
+      })
+      .catch(err => {
+        console.error(err);
+        alert("❌ Error en el proceso de pago");
+      });
+  }
+
+  if (!cotizacionUUID) {
+    crearCotizacion().then(() => continuarFlujo());
+  } else {
+    continuarFlujo();
+  }
+}
+
+function agregarProducto(productoId, cantidad) {
+  const form = new FormData();
   form.append('uuid', cotizacionUUID);
   form.append('producto_id', productoId);
   form.append('cantidad', cantidad);
 
-  var xhr = new XMLHttpRequest();
-  xhr.open('PATCH', API_BASE + '/cotizaciones/producto', true);
-  xhr.onload = function () {
-    cargarCotizacion();
-    mostrarVista('carrito');
-    mostrarPopUp();
+  return fetch(API_BASE + '/cotizaciones/producto', {
+    method: 'PATCH',
+    body: form
+  }).then(res => {
+    if (!res.ok) throw new Error("Error al agregar producto");
+  });
+}
+
+function cargarCotizacion() {
+  fetch(`${API_BASE}/cotizaciones/?uuid=${cotizacionUUID}`)
+    .then(res => res.json())
+    .then(data => {
+      const cotizacion = data[0];
+      const div = document.getElementById('cotizacion');
+      div.innerHTML = '';
+      cotizacion.productos.forEach(p => {
+        const item = document.createElement('div');
+        item.innerText = `${p.nombre} - ${p.cantidad} x $${p.precio_unidad} = $${p.subtotal}`;
+        div.appendChild(item);
+      });
+    });
+}
+
+function crearOrdenDeCompra() {
+  const payload = {
+    cotizacion_uuid: cotizacionUUID,
+    contacto_nombre: document.getElementById('nombre_contacto').value,
+    contacto_email: document.getElementById('email_contacto').value,
+    contacto_telefono: document.getElementById('telefono_contacto').value,
+    direccion_entrega: document.getElementById('direccion_entrega').value,
+    metodo_envio: document.getElementById('metodo_envio').value,
+    metodo_pago: document.getElementById('metodo_pago').value
   };
-  xhr.send(form);
+
+  fetch(API_BASE + '/ordenes/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(res => {
+    if (res.status === 201) {
+      res.json().then(data => pedirURLPago(data.orden_uuid));
+    } else {
+      res.json().then(error => {
+        document.getElementById('mensaje-pago').innerText = "❌ Error: " + (error.error || "Verifica tus datos");
+      });
+    }
+  });
 }
 
-function mostrarPopUp() {
-  const decision = confirm("Producto agregado ✅\n\n¿Deseas ir a pagar o seguir comprando?");
-  if (decision) {
-    mostrarVista('carrito');
-  } else {
-    mostrarVista('productos');
-  }
+function pedirURLPago(ordenUUID) {
+  const form = new FormData();
+  form.append("orden_uuid", ordenUUID);
+
+  fetch(API_BASE + '/pagos/', {
+    method: 'POST',
+    body: form
+  }).then(res => {
+    if (res.status === 201) {
+      res.json().then(data => {
+        window.location.href = data.url_pago + "?token_ws=" + data.token;
+      });
+    } else {
+      alert("❌ Error al generar link de pago.");
+    }
+  });
 }
 
-
-
-// ------------------- ADMIN -------------------
 function crearProducto(event) {
   event.preventDefault();
 
-  var apiKey = document.getElementById('api_key').value;
-  var nombre = document.getElementById('nombre').value;
-  var descripcion = document.getElementById('descripcion').value;
-  var precio = document.getElementById('precio').value;
-  var stock = document.getElementById('stock').value;
-  var imagen = document.getElementById('imagen').files[0];
-
-  var form = new FormData();
-  form.append('api_key', apiKey);
-  form.append('nombre', nombre);
-  form.append('descripcion', descripcion);
-  form.append('precio', precio);
-  form.append('stock', stock);
-  form.append('imagen', imagen);
-
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', API_BASE + '/productos/', true);
-  xhr.onload = function () {
-    var mensaje = document.getElementById('mensaje-admin');
-    if (xhr.status === 201) {
-      mensaje.innerText = 'Producto creado con éxito ✅';
+  const form = new FormData(document.getElementById('form-nuevo-producto'));
+  fetch(API_BASE + '/productos/', {
+    method: 'POST',
+    body: form
+  }).then(res => {
+    const mensaje = document.getElementById('mensaje-admin');
+    if (res.status === 201) {
+      mensaje.innerText = '✅ Producto creado con éxito';
       document.getElementById('form-nuevo-producto').reset();
     } else {
-      var respuesta = JSON.parse(xhr.responseText);
-      mensaje.innerText = 'Error: ' + (respuesta.error || 'no se pudo crear');
+      res.json().then(data => {
+        mensaje.innerText = '❌ Error: ' + (data.error || 'no se pudo crear');
+      });
     }
-  };
-  xhr.send(form);
+  });
 }

@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ferremas - Cotizador</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/static/styles.css"/>
 </head>
 <body>
   <header>
@@ -18,24 +18,47 @@
   </header>
 
   <main>
+    <!-- Portada -->
     <section id="portada" class="vista">
-      <h2>Bienvenido al sistema de cotizaciones Ferremas</h2>
-      <p>Explora nuestros productos, arma tu carrito y genera tu orden de compra.</p>
+      <h2>Bienvenido a Ferremas</h2>
+      <p>Explora y compra tus productos directamente</p>
     </section>
 
+    <!-- Productos -->
     <section id="productos" class="vista" style="display:none">
-      <h2>Productos disponibles</h2>
+      <h2>Productos</h2>
       <div id="lista-productos" class="grid-productos"></div>
     </section>
 
+    <!-- Carrito / Cotización -->
     <section id="carrito" class="vista" style="display:none">
-      <h2>🧾 Cotización actual</h2>
+      <h2>🧾 Cotización</h2>
       <div id="cotizacion"></div>
-      <button id="bloquearCotizacionBtn">Bloquear Cotización</button>
+
+      <h3>📦 Datos del comprador</h3>
+      <form id="form-orden-compra">
+        <input type="text" id="nombre_contacto" placeholder="Nombre completo" required><br>
+        <input type="email" id="email_contacto" placeholder="Correo electrónico" required><br>
+        <input type="tel" id="telefono_contacto" placeholder="Teléfono" required><br>
+        <input type="text" id="direccion_entrega" placeholder="Dirección de entrega" required><br>
+        <select id="metodo_envio" required>
+          <option value="">Método de envío</option>
+          <option value="retiro">Retiro en tienda</option>
+          <option value="despacho">Despacho a domicilio</option>
+        </select><br>
+        <select id="metodo_pago" required>
+          <option value="">Método de pago</option>
+          <option value="webpay">WebPay</option>
+          <option value="efectivo">Pago en efectivo</option>
+        </select><br>
+        <button type="submit">Pagar ahora</button>
+      </form>
+      <div id="mensaje-pago"></div>
     </section>
 
+    <!-- Panel de Administración -->
     <section id="admin" class="vista" style="display:none">
-      <h2>Agregar nuevo producto (requiere API Key)</h2>
+      <h2>Agregar producto (requiere API Key)</h2>
       <form id="form-nuevo-producto">
         <input type="text" id="api_key" placeholder="API Key" required>
         <input type="text" id="nombre" placeholder="Nombre" required>
