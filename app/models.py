@@ -41,11 +41,23 @@ class CotizacionProducto(db.Model):
 class OrdenCompra(db.Model):
     __tablename__ = 'orden_compra'
     id = db.Column(db.Integer, primary_key=True)
-    cotizacion_id = db.Column(db.Integer, db.ForeignKey('cotizacion.id'), nullable=False, unique=True)
-    
+
+    cotizacion_id = db.Column(
+        db.Integer, 
+        db.ForeignKey('cotizacion.id'), 
+        nullable=False, 
+        unique=True
+    )
+
     fecha_envio = db.Column(db.DateTime)
     direccion_entrega = db.Column(db.String(200))
-    estado = db.Column(db.String(50), default='pendiente')
+    contacto_nombre = db.Column(db.String(100), nullable=False)
+    contacto_email = db.Column(db.String(120), nullable=False)
+    contacto_telefono = db.Column(db.String(20), nullable=False)
+
+    metodo_envio = db.Column(db.String(50))  # ej: "retiro", "despacho", etc.
+    metodo_pago = db.Column(db.String(50))   # ej: "transferencia", "webpay", "efectivo", etc.
+
+    estado = db.Column(db.String(50), default='pendiente')  # pendiente, pagada, en camino, recibido
 
     cotizacion = db.relationship("Cotizacion", back_populates="orden_compra")
-    
